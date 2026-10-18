@@ -11,6 +11,17 @@ const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
+// Logging middleware
+app.use((req,res, next) => {
+    const start = Date.now();
+
+    res.on("finish", () => {
+        const duration = Date.now() - start;
+        console.log(`${new Date().toISOString()} ${req.method} ${req.originalUrl} ${res.statusCode} ${duration}ms`);
+    });
+    next();
+})
+
 app.use("/api/properties", propertiesRouter);
 
 // Health check endpoint
@@ -33,12 +44,3 @@ app.get("/api/health", async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port http://localhost:${PORT}`);
 });
-
-
-
-// city - L_City
-// zipcode - L_Zip
-// minPrice - L_SystemPrice
-// maxPrice
-// beds - L_Keyword2
-// baths - LM_Dec_3

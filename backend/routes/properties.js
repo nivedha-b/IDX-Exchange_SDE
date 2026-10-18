@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db.js")
 
-// GET properties
+// GET properties (/api/properties)
 router.get("/", async (req, res) => {
     try {
         const limit = req.query.limit !== undefined ? Number(req.query.limit) : 20;
@@ -115,9 +115,9 @@ router.get("/", async (req, res) => {
         }
        
 
-        // get properties
+        // query properties
         const queryValues = [...values, limit, offset]
-        const [rows] = await pool.query (
+        const [rows] = await pool.query(
             "SELECT * FROM rets_property" +
             whereClause +
             " LIMIT ? OFFSET ?",
@@ -126,7 +126,7 @@ router.get("/", async (req, res) => {
 
         // get total count of properties
         const countQuery = "SELECT COUNT(*) AS total FROM rets_property" + whereClause;
-        const [countRows] = await pool.query (
+        const [countRows] = await pool.query(
             countQuery,
             values
         );
@@ -139,9 +139,103 @@ router.get("/", async (req, res) => {
             results: rows
         });
 
-    } catch (error) {
+    } catch(error) {
         console.error(error);
+        res.status(500).json({
+            error: "Failed to retrieve properties"
+        });
+    }
+});
 
+// Test Case:
+// SELECT COUNT(*) 
+// FROM rets_property 
+// WHERE L_SystemPrice >= 300000 AND L_Keyword2 = 3;
+// returns total = 17993
+
+
+// GET /api/properties/:id/openhouses
+router.get("/:id/openhouses", async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        // validate id
+        if(!id || id.trim() === "") {
+            return res.status(400).json({
+                error: "Listing ID is required"
+            });
+        }
+
+        if(id.length > 255) {
+            return res.status(400).json({
+                error: "Listing ID is too long"
+            });
+        }
+
+        // query properties by id to check if property exists
+        const [rows] = await pool.query(
+            "SELECT * FROM rets_property WHERE L_ListingID = ?",
+            [id]
+        );
+
+        // check if property exists, query rets_openhouse if it does, else show 404 
+        if(rows.length > 0) {
+            const [openHouseRows] = await pool.query(
+                "SELECT * FROM rets_openhouse WHERE L_ListingID = ? ORDER BY OpenHouseDate, OH_StartTime",
+                [id]
+            )
+            res.json(openHouseRows);
+        } else {
+            res.status(404).json({
+                error: "Unknown Listing ID"
+            });
+        }
+
+    } catch(error) {
+        console.error(error);
+        res.status(500).json({
+            error: "Failed to retrieve open houses"
+        });
+    }
+});
+
+
+// GET /api/properties/:id
+router.get("/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+
+
+        // validate id
+        if(!id || id.trim() === "") {
+            return res.status(400).json({
+                error: "Listing ID is required"
+            });
+        }
+
+        if(id.length > 255) {
+            return res.status(400).json({
+                error: "Listing ID is too long"
+            });
+        }
+
+        // query properties by id
+        const [rows] = await pool.query(
+            "SELECT * FROM rets_property WHERE L_ListingID = ?",
+            [id]
+        );
+
+        // show results if rows is not empty, 404 if nothing was found
+        if(rows.length > 0) {
+            res.json(rows[0]);
+        } else {
+            res.status(404).json({
+                error: "Unknown Listing ID"
+            });
+        }
+
+    } catch(error) {
+        console.error(error);
         res.status(500).json({
             error: "Failed to retrieve properties"
         });
@@ -149,9 +243,3 @@ router.get("/", async (req, res) => {
 });
 
 module.exports = router;
-
-// Test Case:
-// SELECT COUNT(*) 
-// FROM rets_property 
-// WHERE L_SystemPrice >= 300000 AND L_Keyword2 = 3;
-// returns total = 17993
