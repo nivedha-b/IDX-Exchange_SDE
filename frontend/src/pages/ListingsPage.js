@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchProperties } from "../api/client";
+import PropertyCard from "../components/PropertyCard";
 
 function ListingsPage() {
     const [properties, setProperties] = useState([]);
@@ -37,7 +38,14 @@ function ListingsPage() {
             <h1>Properties</h1>
             <p>Showing {properties.length} of {total} properties</p>
 
-            <pre>{JSON.stringify(properties, null, 2)}</pre>
+            <div className="property-grid">
+                {properties.map((property) => (
+                    <PropertyCard
+                        key={property.id}
+                        property={property}
+                    />
+                ))}
+            </div>
         </div>
     );
 }
