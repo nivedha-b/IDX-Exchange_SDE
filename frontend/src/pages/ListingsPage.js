@@ -59,14 +59,6 @@ function ListingsPage() {
         }
     }
 
-    if (loading) {
-        return <p>Loading properties...</p>;
-    }
-
-    if (error) {
-        return <p>Error: {error}</p>;
-    }
-
     return (
         <div>
             <h1>Properties</h1>
@@ -76,19 +68,27 @@ function ListingsPage() {
                 onClear={handleClear}
             />
 
-            <p>Showing {properties.length} of {total} properties</p>
-
-            {properties.length === 0 ? (
-                <p>No properties found matching your filters.</p>
+            {loading ? (
+                <p>Loading properties...</p>
+            ) : error ? (
+                <p>Error: {error}</p>
             ) : (
-                <div className="property-grid">
-                    {properties.map((property) => (
-                        <PropertyCard
-                            key={property.id}
-                            property={property}
-                        />
-                    ))}
-                </div>
+                <>
+                    <p>Showing {properties.length} of {total} properties</p>
+
+                    {properties.length === 0 ? (
+                        <p>No properties found matching your filters.</p>
+                    ) : (
+                        <div className="property-grid">
+                            {properties.map((property) => (
+                                <PropertyCard
+                                    key={property.id}
+                                    property={property}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );
