@@ -11,13 +11,13 @@ function PropertyFilters({ onSearch, onClear}) {
     });
 
     function handleChange(event) {
-    const { name, value } = event.target;
+        const { name, value } = event.target;
 
-    setFilters({
-        ...filters,
-        [name]: value
-    });
-}
+        setFilters({
+            ...filters,
+            [name]: value
+        });
+    }
 
     function handleSubmit(event) {
         event.preventDefault();
