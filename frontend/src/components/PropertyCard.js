@@ -1,23 +1,12 @@
-function PropertyCard({ property }) {
-    let firstPhoto = null;
+import { useNavigate } from "react-router-dom";
+import PropertyImageCarousel from "./PropertyImageCarousel";
 
-    try {
-        if(property.L_Photos) {
-            const photos = JSON.parse(property.L_Photos);
-            if(Array.isArray(photos) && photos.length > 0) {
-                firstPhoto = photos[0];
-            }
-        }
-    } catch(error) {
-        console.error("Invalid photo data:", error);
-    }
+function PropertyCard({ property }) {
+    const navigate = useNavigate();
 
     return (
-        <div className="property-card">
-            {firstPhoto ? (<img 
-                src={firstPhoto} 
-                alt={property.L_Address || "Property"}/>) 
-            : (<div className="no-photo">No photo available</div>)}
+        <div className="property-card" onClick={() => navigate(`/property/${property.L_ListingID}`)}>
+            <PropertyImageCarousel photos={property.L_Photos} />
             <h2>${property.L_SystemPrice?.toLocaleString()}</h2>
             <p>{property.L_Address}</p>
             <p>{property.L_City}, {property.L_State}</p>

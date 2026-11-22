@@ -18,3 +18,11 @@ export async function fetchPropertyDetail(id) {
     }
     return await response.json();
 }
+
+export async function fetchOpenHouses(id) {
+    const response = await fetch(`/api/properties/${id}/openhouses`);
+    if(!response.ok) {
+        throw new Error("Failed to fetch open houses");
+    }
+    return await response.json();
+}
